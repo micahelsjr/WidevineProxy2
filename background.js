@@ -5,7 +5,7 @@ const { LicenseType, SignedMessage, LicenseRequest, License } = protobuf.roots.d
 import "./lib/forge.min.js";
 
 import { Session } from "./lib/cdm.js";
-import { DeviceManager, SettingsManager, AsyncLocalStorage, RemoteCDMManager, Util } from "./lib/util.js";
+import { DeviceManager, SettingsManager, AsyncLocalStorage, RemoteCDMManager, IconManager, Util } from "./lib/util.js";
 import { WidevineDevice } from "./lib/device.js";
 import { RemoteCdm } from "./lib/remote_cdm.js";
 
@@ -142,6 +142,7 @@ async function parseLicense(body, sendResponse, tab_url) {
     }
     logs.push(log);
     await AsyncLocalStorage.setStorage({[pssh]: log});
+    IconManager.setNotificationIcon();
 
     sessions.delete(loaded_request_id);
     sendResponse();
@@ -328,6 +329,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             case "CLEAR":
                 logs = [];
                 manifests.clear();
+                IconManager.setDefaultIcon();
                 break;
             case "MANIFEST":
                 const parsed = JSON.parse(message.body);
@@ -350,4 +352,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         }
     })();
     return true;
+});
+
+chrome.runtime.onSuspend.addListener(() => {
+    IconManager.setDefaultIcon();
 });
